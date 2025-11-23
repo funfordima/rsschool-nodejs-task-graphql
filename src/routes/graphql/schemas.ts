@@ -9,6 +9,7 @@ import { profileQueries } from './queries/profileQuery.js';
 import { prismaStatsQueries } from './queries/prismaStatsQuery.js';
 import { profileMutation } from './mutations/profileMutation.js';
 import { userMutations } from './mutations/userMutations.js';
+import { postMutations } from './mutations/postMutations.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -47,6 +48,7 @@ export const makeSchema = (prisma) =>
       fields: {
         ...userMutations(prisma),
         ...profileMutation(prisma),
+        ...postMutations(prisma),
       },
     }),
   });

@@ -7,7 +7,7 @@ import { UserType } from './userType.js';
 
 export const PostType = new GraphQLObjectType({
   name: 'Post',
-  description: 'Blog post entry',
+  description: 'Blog post',
 
   fields: () => ({
     id: {
