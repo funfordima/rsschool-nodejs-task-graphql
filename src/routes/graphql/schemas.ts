@@ -5,6 +5,8 @@ import { GraphQLSchema, GraphQLObjectType } from 'graphql';
 import { postQueries } from './queries/postQuery.js';
 import { userQueries } from './queries/userQuery.js';
 import { memberTypeQueries } from './queries/memberTypeQuery.js';
+import { profileQueries } from './queries/profileQuery.js';
+import { prismaStatsQueries } from './queries/prismaStatsQuery.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -31,8 +33,10 @@ export const makeSchema = (prisma) =>
       name: 'Query',
       fields: {
         ...memberTypeQueries(prisma),
+        ...profileQueries(prisma),
         ...postQueries(prisma),
         ...userQueries(prisma),
+        ...prismaStatsQueries(prisma),
       },
     }),
   });
