@@ -2,6 +2,7 @@ import { GraphQLList, GraphQLNonNull } from 'graphql';
 
 import { ProfileType } from '../types/profileType.js';
 import { UUIDType } from '../types/uuid.js';
+import { logOperation } from '../metrics/metrics.js';
 
 export const profileQueries = (prisma) => ({
   profile: {
@@ -11,11 +12,23 @@ export const profileQueries = (prisma) => ({
         type: new GraphQLNonNull(UUIDType),
       }
     },
-    resolve: (_, { id }) => prisma.profile.findUnique({ where: { id }}),
+    resolve: (_, { id }) => {
+      const profile = prisma.profile.findUnique({ where: { id }});
+
+      logOperation('Profile', 'load', profile);
+      
+      return profile;
+    }
   },
 
   profiles: {
     type: new GraphQLList(ProfileType),
-    resolve: () => prisma.profile.findMany(),
+    resolve: () => {
+      const profiles = prisma.profile.findMany();
+
+      logOperation('Profiles', 'load', profiles);
+
+      return profiles;
+    }
   },
 });

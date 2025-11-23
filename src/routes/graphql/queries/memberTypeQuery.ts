@@ -1,6 +1,7 @@
 import { GraphQLList, GraphQLNonNull } from 'graphql';
 
 import { MemberType, MemberTypeIdEnum } from '../types/memberType.js';
+import { logOperation } from '../metrics/metrics.js';
 
 export const memberTypeQueries = (prisma) => ({
 
@@ -8,6 +9,9 @@ export const memberTypeQueries = (prisma) => ({
     type: new GraphQLList(MemberType),
     resolve: async () => {
       const types = await prisma.memberType.findMany();
+
+      logOperation('MemberTypes', 'load', types);
+
       return types || [];
     },
   },
@@ -21,6 +25,8 @@ export const memberTypeQueries = (prisma) => ({
       const type = await prisma.memberType.findUnique({ where: { id } });
       
       if (!type) throw new Error(`MemberType ${id} not found`);
+
+      logOperation('MemberType', 'load', type);
 
       return type;
     }

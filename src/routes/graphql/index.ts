@@ -25,8 +25,6 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
 
       const errors = validate(schema, parse(query), [depthLimit(5)]);
 
-      // console.log(errors);
-
       if (errors && errors.length > 0) {
         return {
           data: null,
@@ -34,7 +32,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         };
       }
 
-      const result = await graphql({
+      return await graphql({
         schema,
         source: query,
         variableValues: variables,
@@ -43,9 +41,6 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
           loaders: getLoaders(prisma),
         },
       });
-
-      console.log("GQL ERRORS:", result.errors);
-      return result;
     },
   });
 };

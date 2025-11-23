@@ -3,6 +3,7 @@ import { GraphQLList, GraphQLNonNull, GraphQLResolveInfo } from 'graphql';
 import { UserType } from '../types/userType.js';
 import { UUIDType } from '../types/uuid.js';
 import { parseResolveInfo, ResolveTree, simplifyParsedResolveInfoFragmentWithType } from 'graphql-parse-resolve-info';
+import { logOperation } from '../metrics/metrics.js';
 
 export const userQueries = (prisma) => ({
   users: {
@@ -30,6 +31,8 @@ export const userQueries = (prisma) => ({
           context.loaders.userLoader.prime(user.id, user);
         }
 
+        logOperation('Users', 'load', users);
+
         return users;
     },
   },
@@ -39,7 +42,13 @@ export const userQueries = (prisma) => ({
     args: {
       id: { type: new GraphQLNonNull(UUIDType) },
     },
-    resolve: async (_, { id }, context) => await context.loaders.userLoader.load(id),
+    resolve: async (_, { id }, context) => {
+      const user = await context.loaders.userLoader.load(id);
+
+      logOperation('User', 'load', user);
+
+      return user;
+    }
   },
 
 });
