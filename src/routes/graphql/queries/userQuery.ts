@@ -1,10 +1,7 @@
-import {
-  GraphQLList,
-  GraphQLNonNull,
-  GraphQLString,
-} from 'graphql';
+import { GraphQLList, GraphQLNonNull } from 'graphql';
 
 import { UserType } from '../types/userType.js';
+import { UUIDType } from '../types/uuid.js';
 
 export const userQueries = (prisma) => ({
 
@@ -16,9 +13,9 @@ export const userQueries = (prisma) => ({
   user: {
     type: UserType,
     args: {
-      id: { type: new GraphQLNonNull(GraphQLString) },
+      id: { type: new GraphQLNonNull(UUIDType) },
     },
-    resolve: (_, { id }, { prisma }) =>
+    resolve: (_, { id }) =>
       prisma.user.findUnique({ where: { id } }),
   },
 

@@ -4,7 +4,7 @@ import { PrismaStatsType } from '../types/prismaStatsType.js';
 export const prismaStatsQueries = (prisma) => ({
   stats: {
     type: PrismaStatsType,
-    resolve: (prisma) => ({
+    resolve: () => ({
       operationHistory: getOperations(),
     }),
   },

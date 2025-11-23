@@ -1,9 +1,7 @@
-import {
-  GraphQLList,
-  GraphQLNonNull,
-  GraphQLString,
-} from 'graphql';
+import { GraphQLList, GraphQLNonNull } from 'graphql';
+
 import { PostType } from '../types/postType.js';
+import { UUIDType } from '../types/uuid.js';
 
 export const postQueries = (prisma) => ({
 
@@ -15,9 +13,9 @@ export const postQueries = (prisma) => ({
   post: {
     type: PostType,
     args: {
-      id: { type: new GraphQLNonNull(GraphQLString) },
+      id: { type: new GraphQLNonNull(UUIDType) },
     },
-    resolve: (_, { id }, { prisma }) =>
+    resolve: (_, { id }) =>
       prisma.post.findUnique({
         where: { id },
       }),

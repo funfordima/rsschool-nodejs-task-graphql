@@ -6,6 +6,8 @@ import {
   GraphQLList,
 } from 'graphql';
 import { PostType } from './postType.js';
+import { UUIDType } from './uuid.js';
+import { ProfileType } from './profileType.js';
 
 export const UserType = new GraphQLObjectType({
   name: 'User',
@@ -13,7 +15,7 @@ export const UserType = new GraphQLObjectType({
 
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: new GraphQLNonNull(UUIDType),
     },
     name: {
       type: new GraphQLNonNull(GraphQLString),
@@ -28,6 +30,12 @@ export const UserType = new GraphQLObjectType({
         prisma.post.findMany({
           where: { authorId: user.id },
         }),
+    },
+
+    profile: {
+      type: ProfileType,
+      resolve: ({ id }, _, { prisma }) =>
+        prisma.profile.findFirst({ where: { userId: id } }),
     },
   }),
 });

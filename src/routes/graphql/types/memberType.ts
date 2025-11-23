@@ -5,13 +5,13 @@ import {
   GraphQLEnumType,
   GraphQLInt,
 } from 'graphql';
+import { MemberTypeId } from '../../member-types/schemas.js';
 
 export const MemberTypeIdEnum = new GraphQLEnumType({
-  name: "MemberTypeIdEnum",
-  values: {
-    BASIC: { value: "BASIC" },
-    BUSINESS: { value: "BUSINESS" },
-  },
+  name: 'MemberTypeId',
+  values: Object.fromEntries(
+    Object.values(MemberTypeId).map((key) => [key, { value: key }])
+  ),
 });
 
 export const MemberType = new GraphQLObjectType({

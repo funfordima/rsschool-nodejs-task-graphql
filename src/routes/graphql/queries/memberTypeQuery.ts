@@ -1,26 +1,29 @@
-import {
-  GraphQLList,
-  GraphQLNonNull,
-  GraphQLString,
-} from 'graphql';
-import { MemberType } from '../types/memberType.js';
+import { GraphQLList, GraphQLNonNull } from 'graphql';
+
+import { MemberType, MemberTypeIdEnum } from '../types/memberType.js';
 
 export const memberTypeQueries = (prisma) => ({
 
   memberTypes: {
     type: new GraphQLList(MemberType),
-    resolve: () => prisma.memberType.findMany(),
+    resolve: async () => {
+      const types = await prisma.memberType.findMany();
+      return types || [];
+    },
   },
 
   memberType: {
     type: MemberType,
     args: {
-      id: { type: new GraphQLNonNull(GraphQLString) },
+      id: { type: new GraphQLNonNull(MemberTypeIdEnum) },
     },
-    resolve: (_, { id }, { prisma }) =>
-      prisma.memberType.findUnique({
-        where: { id },
-      }),
+    resolve: async (_parent, { id }) => {
+      const type = await prisma.memberType.findUnique({ where: { id } });
+      
+      if (!type) throw new Error(`MemberType ${id} not found`);
+
+      return type;
+    }
   },
 
 });

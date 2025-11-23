@@ -1,14 +1,15 @@
-import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'graphql';
+import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 
 import { UserType } from './userType.js';
 import { MemberType } from './memberType.js';
+import { UUIDType } from './uuid.js';
 
 export const ProfileType = new GraphQLObjectType({
   name: 'ProfileType',
   description: 'User profile information',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: new GraphQLNonNull(UUIDType),
       description: 'Profile Id (UUID)'
     },
 
@@ -33,6 +34,22 @@ export const ProfileType = new GraphQLObjectType({
       type: new GraphQLNonNull(MemberType),
       resolve: (profile, args, { prisma }) => {
         return prisma.memberType.findUnique({ where: { id: profile.memberTypeId }});
+      },
+    },
+
+    user: {
+      type: UserType,
+      resolve: ({ userId }, _, { prisma }) => {
+        return prisma.user.findUnique({ where: { id: userId } });
+      },
+    },
+
+    memberType: {
+      type: MemberType,
+      resolve: ({ memberTypeId }, _, { prisma }) => {
+        return prisma.memberType.findUnique({
+          where: { id: memberTypeId },
+        });
       },
     },
   }),
