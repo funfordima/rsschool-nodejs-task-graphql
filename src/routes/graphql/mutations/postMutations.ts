@@ -2,61 +2,54 @@ import { GraphQLNonNull, GraphQLString } from 'graphql';
 
 import { PostType } from '../types/postType.js';
 import { logOperation } from '../metrics/metrics.js';
+import { UUIDType } from '../types/uuid.js';
+import { ChangePostInputType, CreatePostInputType } from '../types/inputTypes.js';
 
 export const postMutations = (prisma) => ({
   createPost: {
     type: PostType,
     args: {
-      title: {
-        type: new GraphQLNonNull(GraphQLString),
-      },
-      content: {
-        type: new GraphQLNonNull(GraphQLString),
-      },
-      authorId: {
-        type: new GraphQLNonNull(GraphQLString),
-      }
+      dto: { type: new GraphQLNonNull(CreatePostInputType) }
     },
-    resolve: (_, args, { prisma }) => {
-      logOperation('Post', 'create', args);
+    resolve: (_, { dto }, { prisma }) => {
+      logOperation('Post', 'create', dto);
       
-      return prisma.post.create({ data: args });
+      return prisma.post.create({ data: dto });
     },
   },
 
-  updatePost: {
+  changePost: {
     type: PostType,
     args: {
       id: {
-        type: new GraphQLNonNull(GraphQLString),
+        type: new GraphQLNonNull(UUIDType),
       },
-      title: {
-        type: GraphQLString,
-      },
-      content: {
-        type: GraphQLString,
-      },
+      dto: { type: new GraphQLNonNull(ChangePostInputType) }
     },
-    resolve: (_, { id, ...rest }, { prisma }) => {
-      logOperation('Post', 'update', { id, ...rest });
+    resolve: (_, { id, dto }, { prisma }) => {
+      logOperation('Post', 'update', { id, dto });
       
-      return prisma.post.update({ where: { id }, data: rest });
+      return prisma.post.update({ where: { id }, data: dto });
     },
   },
 
   deletePost: {
-    type: PostType,
+    type: GraphQLString,
     args: {
       id: {
-        type: new GraphQLNonNull(GraphQLString),
+        type: new GraphQLNonNull(UUIDType),
       },
     },
     resolve: async (_, { id }, { prisma }) => {
       logOperation('Post', 'delete', { id });
-      
-      await  prisma.post.delete({ where: { id } });
 
-      return id;
+      try {
+        await prisma.post.delete({ where: { id } });
+
+        return id;
+      } catch (error) {
+        return null;
+      }
     },
   },
 });

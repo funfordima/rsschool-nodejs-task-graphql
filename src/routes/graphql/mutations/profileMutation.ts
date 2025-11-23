@@ -1,69 +1,55 @@
-import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLString } from 'graphql';
+import { GraphQLNonNull, GraphQLString } from 'graphql';
 
 import { ProfileType } from '../types/profileType.js';
-import { MemberTypeIdEnum } from '../types/memberType.js';
 import { logOperation } from '../metrics/metrics.js';
+import { ChangeProfileInput, CreateProfileInputType } from '../types/inputTypes.js';
+import { UUIDType } from '../types/uuid.js';
 
 export const profileMutation = (prisma) => ({
   createProfile: {
     type: ProfileType,
     args: {
-      userId: {
-        type: new GraphQLNonNull(GraphQLString),
-      },
-      isMale: {
-        type: new GraphQLNonNull(GraphQLBoolean),
-      },
-      memberTypeId: {
-        type: new GraphQLNonNull(MemberTypeIdEnum),
-      },
-      yearOfBirth: {
-        type: new GraphQLNonNull(GraphQLInt),
-      },
+      dto: { type: new GraphQLNonNull(CreateProfileInputType) }
     },
-    resolve: (_, args, { prisma }) => {
-      logOperation('Profile', 'create', args);
+    resolve: (_, { dto }, { prisma }) => {
+      logOperation('Profile', 'create', dto);
 
-      return prisma.profile.create({ data: args });
+      return prisma.profile.create({ data: dto });
     },
   },
 
-  updateProfile: {
+  changeProfile: {
     type: ProfileType,
     args: {
       id: {
-        type: new GraphQLNonNull(GraphQLString),
+        type: new GraphQLNonNull(UUIDType),
       },
-      isMale: {
-        type: GraphQLBoolean,
-      },
-      memberTypeId: {
-        type: MemberTypeIdEnum,
-      },
-      yearOfBirth: {
-        type: GraphQLInt,
-      },
+      dto: { type: new GraphQLNonNull(ChangeProfileInput) }
     },
-    resolve: (_, { id, ...rest }, { prisma }) => {
-      logOperation('Profile', 'update', { id, ...rest });
+    resolve: (_, { id, dto  }, { prisma }) => {
+      logOperation('Profile', 'update', { id, dto  });
 
-      return prisma.profile.update({ where: { id }, data: rest });
+      return prisma.profile.update({ where: { id }, data: dto  });
     },
   },
 
   deleteProfile: {
-    type: ProfileType,
+    type: GraphQLString,
     args: {
       id: {
-        type: new GraphQLNonNull(GraphQLString),
+        type: new GraphQLNonNull(UUIDType),
       },
     },
     resolve: async (_, { id }, { prisma }) => {
       logOperation('Profile', 'delete', { id });
 
-      await prisma.profile.delete({ where: { id }});
+      try {
+        await prisma.profile.delete({ where: { id }});
 
-      return id;
+        return id;
+      } catch (error) {
+        return null;
+      }
     },
   },
 });
