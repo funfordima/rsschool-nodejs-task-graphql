@@ -1,5 +1,22 @@
 import { Type } from '@fastify/type-provider-typebox';
 
+import { GraphQLSchema, GraphQLObjectType } from 'graphql';
+
+import { postQueries } from './queries/postQuery.js';
+import { userQueries } from './queries/userQuery.js';
+import { memberTypeQueries } from './queries/memberTypeQuery.js';
+import { profileQueries } from './queries/profileQuery.js';
+import { prismaStatsQueries } from './queries/prismaStatsQuery.js';
+import { profileMutation } from './mutations/profileMutation.js';
+import { userMutations } from './mutations/userMutations.js';
+import { postMutations } from './mutations/postMutations.js';
+import { UUIDType } from './types/uuid.js';
+import { UserType } from './types/userType.js';
+import { PostType } from './types/postType.js';
+import { ProfileType } from './types/profileType.js';
+import { MemberType, MemberTypeIdEnum } from './types/memberType.js';
+import { subscribeMutation } from './mutations/subscribeMutations.js';
+
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
     data: Type.Any(),
@@ -18,3 +35,35 @@ export const createGqlResponseSchema = {
     },
   ),
 };
+
+export const makeSchema = (prisma) =>
+  new GraphQLSchema({
+    types: [
+      UUIDType,
+      UserType,
+      PostType,
+      ProfileType,
+      MemberType,
+      MemberTypeIdEnum,
+    ],
+    query: new GraphQLObjectType({
+      name: 'Query',
+      fields: {
+        ...userQueries(prisma),
+        ...memberTypeQueries(prisma),
+        ...profileQueries(prisma),
+        ...postQueries(prisma),
+        ...prismaStatsQueries(prisma),
+      },
+    }),
+
+    mutation: new GraphQLObjectType({
+      name: 'Mutation',
+      fields: {
+        ...userMutations(prisma),
+        ...profileMutation(prisma),
+        ...postMutations(prisma),
+        ...subscribeMutation(prisma),
+      },
+    }),
+  });

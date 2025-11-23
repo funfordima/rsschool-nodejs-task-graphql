@@ -1,10 +1,13 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
-import { graphql } from 'graphql';
+import { graphql, parse, validate } from 'graphql';
+import depthLimit from 'graphql-depth-limit';
+
+import { createGqlResponseSchema, gqlResponseSchema, makeSchema } from './schemas.js';
+import { PrismaClient, Prisma } from '@prisma/client';
+import { DefaultArgs } from '@prisma/client/runtime/library.js';
+import { getLoaders } from './loaders/loaders.js';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
-  const { prisma } = fastify;
-
   fastify.route({
     url: '/',
     method: 'POST',
@@ -15,9 +18,35 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async handler(req) {
-      // return graphql();
+      const { prisma } = fastify;
+
+      const { query, variables } = req.body;
+      const schema = makeSchema(prisma);
+
+      const errors = validate(schema, parse(query), [depthLimit(5)]);
+
+      if (errors && errors.length > 0) {
+        return {
+          data: null,
+          errors,
+        };
+      }
+
+      return await graphql({
+        schema,
+        source: query,
+        variableValues: variables,
+        contextValue: { 
+          prisma: prisma,
+          loaders: getLoaders(prisma),
+        },
+      });
     },
   });
 };
 
 export default plugin;
+function getDataLoaders(prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>) {
+  throw new Error('Function not implemented.');
+}
+
