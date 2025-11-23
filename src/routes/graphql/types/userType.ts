@@ -37,5 +37,27 @@ export const UserType = new GraphQLObjectType({
       resolve: ({ id }, _, { prisma }) =>
         prisma.profile.findFirst({ where: { userId: id } }),
     },
+
+    subscribedToUser: {
+      type: new GraphQLList(UserType),
+      description: 'Users for whom this user subscribed to',
+      resolve: async (source, _args: unknown, context) =>
+        source.subscribedToUser
+          ? context.loaders.userLoader.loadMany(
+              source.subscribedToUser.map((user) => user.subscriberId),
+            )
+          : null,
+    },
+
+    userSubscribedTo: {
+      type: new GraphQLList(UserType),
+      description: 'Users subscribed to this user',
+      resolve: async (source, _args: unknown, context) =>
+        source.userSubscribedTo
+          ? context.loaders.userLoader.loadMany(
+              source.userSubscribedTo.map((user) => user.authorId),
+            )
+          : null,
+    },
   }),
 });

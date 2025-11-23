@@ -3,10 +3,11 @@ import { graphql, parse, validate } from 'graphql';
 import depthLimit from 'graphql-depth-limit';
 
 import { createGqlResponseSchema, gqlResponseSchema, makeSchema } from './schemas.js';
+import { PrismaClient, Prisma } from '@prisma/client';
+import { DefaultArgs } from '@prisma/client/runtime/library.js';
+import { getLoaders } from './loaders/loaders.js';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
-  const { prisma } = fastify;
-
   fastify.route({
     url: '/',
     method: 'POST',
@@ -17,6 +18,8 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async handler(req) {
+      const { prisma } = fastify;
+
       const { query, variables } = req.body;
       const schema = makeSchema(prisma);
 
@@ -35,7 +38,10 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         schema,
         source: query,
         variableValues: variables,
-        contextValue: { prisma: fastify.prisma },
+        contextValue: { 
+          prisma: prisma,
+          loaders: getLoaders(prisma),
+        },
       });
 
       console.log("GQL ERRORS:", result.errors);
@@ -45,3 +51,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
 };
 
 export default plugin;
+function getDataLoaders(prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>) {
+  throw new Error('Function not implemented.');
+}
+

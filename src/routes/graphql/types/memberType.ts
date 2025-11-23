@@ -4,8 +4,10 @@ import {
   GraphQLFloat,
   GraphQLEnumType,
   GraphQLInt,
+  GraphQLList,
 } from 'graphql';
 import { MemberTypeId } from '../../member-types/schemas.js';
+import { ProfileType } from './profileType.js';
 
 export const MemberTypeIdEnum = new GraphQLEnumType({
   name: 'MemberTypeId',
@@ -30,6 +32,11 @@ export const MemberType = new GraphQLObjectType({
     postsLimitPerMonth: {
       type: new GraphQLNonNull(GraphQLInt),
       description: 'Monthly post creation limit'
+    },
+    profiles: {
+      type: new GraphQLList(ProfileType),
+      resolve: async (source, _args: unknown, { prisma }) =>
+        await prisma.profile.findMany({ where: { memberTypeId: source.id } }),
     },
   }),
 });
