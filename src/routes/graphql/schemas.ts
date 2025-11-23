@@ -7,6 +7,8 @@ import { userQueries } from './queries/userQuery.js';
 import { memberTypeQueries } from './queries/memberTypeQuery.js';
 import { profileQueries } from './queries/profileQuery.js';
 import { prismaStatsQueries } from './queries/prismaStatsQuery.js';
+import { profileMutation } from './mutations/profileMutation.js';
+import { userMutations } from './mutations/userMutations.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -39,5 +41,12 @@ export const makeSchema = (prisma) =>
         ...prismaStatsQueries(prisma),
       },
     }),
-  });
 
+    mutation: new GraphQLObjectType({
+      name: 'Mutation',
+      fields: {
+        ...userMutations(prisma),
+        ...profileMutation(prisma),
+      },
+    }),
+  });
