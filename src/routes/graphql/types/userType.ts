@@ -26,16 +26,13 @@ export const UserType = new GraphQLObjectType({
 
     posts: {
       type: new GraphQLList(PostType),
-      resolve: (user, args, { prisma }) =>
-        prisma.post.findMany({
-          where: { authorId: user.id },
-        }),
+      resolve: async ({ id }, _args: unknown, context) => await context.loaders.postsLoader.load(id),
     },
 
     profile: {
       type: ProfileType,
-      resolve: ({ id }, _, { prisma }) =>
-        prisma.profile.findFirst({ where: { userId: id } }),
+      resolve: async ({ id }, _args: unknown, context) =>
+        await context.loaders.profileLoader.load(id),
     },
 
     subscribedToUser: {

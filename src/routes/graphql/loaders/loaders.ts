@@ -2,9 +2,15 @@ import { PrismaClient } from '@prisma/client';
 import DataLoader from 'dataloader';
 
 import { userLoader } from './userLoader.js';
+import { postsLoader } from './postsLoader.js';
+import { memberTypeLoader } from './memberTypeLoader.js';
+import { profileLoader } from './profileLoader.js';
 
 export const getLoaders = (prisma) => ({
   userLoader: userLoader(prisma),
+  postsLoader: postsLoader(prisma),
+  memberTypeLoader: memberTypeLoader(prisma),
+  profileLoader: profileLoader(prisma),
 });
 
 

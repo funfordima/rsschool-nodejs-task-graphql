@@ -30,7 +30,7 @@ export const userQueries = (prisma) => ({
           context.loaders.userLoader.prime(user.id, user);
         }
 
-        return users ?? [];
+        return users;
     },
   },
 
